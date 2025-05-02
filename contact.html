@@ -1,388 +1,413 @@
 <script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="favicon.png" type="image/png">
-    <title>Contact - Mohamed Sabry</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: #0B1A3B url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: #F5F6F5;
-            line-height: 1.6;
-            overflow-x: hidden;
-            position: relative;
-            font-family: 'Arial', sans-serif;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(11, 26, 59, 0.4) url('https://www.transparenttextures.com/patterns/canvas.png');
-            z-index: -1;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        nav {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            padding: 1rem 0;
-            transition: background 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        nav.scrolled {
-            background: rgba(29, 42, 91, 0.9);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .nav-links {
-            display: flex;
-            justify-content: center;
-            gap: 2.5rem;
-        }
-
-        .nav-links a {
-            color: #F5F6F5;
-            text-decoration: none;
-            font-size: 1rem;
-            position: relative;
-            transition: color 0.3s ease;
-            font-family: 'Georgia', serif;
-        }
-
-        .nav-links a.active::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 3px;
-            bottom: -5px;
-            left: 0;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 10"><path d="M0,5 Q25,0 50,5 T100,5" stroke="%23E8D07A" stroke-width="2" fill="none"/></svg>') no-repeat center;
-            background-size: contain;
-        }
-
-        .nav-links a:hover {
-            color: #E8D07A;
-        }
-
-        .contact-section {
-            padding: 5rem 0;
-            text-align: center;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .contact-section h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 1s ease-out 0.3s forwards;
-            color: #F5F6F5;
-            font-family: 'Georgia', serif;
-            position: relative;
-        }
-
-        .contact-section h2::after {
-            content: '';
-            display: block;
-            width: 100px;
-            height: 5px;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 10"><path d="M0,5 Q25,0 50,5 T100,5" stroke="%23E8D07A" stroke-width="2" fill="none"/></svg>') no-repeat center;
-            margin: 1rem auto;
-        }
-
-        .contact-info {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 2rem;
-        }
-
-        .contact-item {
-            background: #1D2A5B;
-            padding: 1.5rem;
-            border-radius: 10px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 1s ease-out 0.6s forwards;
-            min-width: 250px;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            position: relative;
-        }
-
-        .contact-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .contact-item i {
-            font-size: 1.5rem;
-            color: #E8D07A;
-        }
-
-        .contact-item a {
-            color: #E8D07A;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .contact-item a:hover {
-            color: #F5F6F5;
-        }
-
-        .code-snippet {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: #1D2A5B;
-            padding: 0.5rem;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            color: #E8D07A;
-            font-size: 0.8rem;
-            z-index: 10;
-        }
-
-        .contact-item:hover .code-snippet {
-            display: block;
-        }
-
-        footer {
-            text-align: center;
-            padding: 2rem 0;
-            background: #1D2A5B;
-            position: relative;
-        }
-
-        footer p {
-            color: #F5F6F5;
-        }
-
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            background: #E8D07A;
-            border-radius: 50%;
-            animation: twinkle 3s infinite alternate;
-        }
-
-        @keyframes twinkle {
-            0% { opacity: 0.2; }
-            100% { opacity: 0.8; }
-        }
-
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .contact-section h2 {
-                font-size: 2rem;
-            }
-
-            .contact-item {
-                min-width: 200px;
-            }
-
-            .code-snippet {
-                font-size: 0.7rem;
-            }
-
-            .nav-links {
-                gap: 1.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .contact-section h2 {
-                font-size: 1.8rem;
-            }
-
-            .contact-item {
-                padding: 1rem;
-            }
-
-            .code-snippet {
-                font-size: 0.6rem;
-            }
-
-            .nav-links {
-                flex-direction: column;
-                align-items: center;
-                gap: 1rem;
-            }
-
-            .nav-links a {
-                font-size: 0.9rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="particles"></div>
-
-    <nav>
-        <div class="container">
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="projects.html">Projects</a>
-                <a href="contact.html" class="active">Contact</a>
-                <a href="https://github.com/mosabryii" target="_blank">GitHub</a>
-                <a href="https://www.linkedin.com/in/mohamed-sabry-5a857822a/" target="_blank">LinkedIn</a>
-            </div>
-        </div>
-    </nav>
-
-    <section class="contact-section">
-        <div class="container">
-            <h2>Contact Information</h2>
-            <div class="contact-info">
-                <div class="contact-item">
-                    <i class="fas fa-phone"></i>
-                    <p>Phone: <a href="tel:+201159282168">+201159282168</a></p>
-                    <div class="code-snippet">phone = "+201159282168"</div>
-                </div>
-                <div class="contact-item">
-                    <i class="fas fa-envelope"></i>
-                    <p>Email: <a href="mailto:mohameds.ms192@gmail.com">mohameds.ms192@gmail.com</a></p>
-                    <div class="code-snippet">email = "mohameds.ms192@gmail.com"</div>
-                </div>
-                <div class="contact-item">
-                    <i class="fab fa-linkedin"></i>
-                    <p>LinkedIn: <a href="https://www.linkedin.com/in/mohamed-sabry-5a857822a/" target="_blank">Profile</a></p>
-                    <div class="code-snippet">url = "linkedin.com/in/mohamed-sabry"</div>
-                </div>
-                <div class="contact-item">
-                    <i class="fab fa-github"></i>
-                    <p>GitHub: <a href="https://github.com/mosabryii" target="_blank">mosabryii</a></p>
-                    <div class="code-snippet">repo = "github.com/mosabryii"</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <footer>
-        <div class="container">
-            <p>© 2025 Mohamed Sabry. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <script>
-        // Create particles
-        function createParticles() {
-            const particlesContainer = document.querySelector('.particles');
-            const numParticles = 50;
-            for (let i = 0; i < numParticles; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.width = `${Math.random() * 2 + 1}px`;
-                particle.style.height = particle.style.width;
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.top = `${Math.random() * 100}%`;
-                particle.style.animationDelay = `${Math.random() * 3}s`;
-                particlesContainer.appendChild(particle);
-            }
-        }
-        createParticles();
-
-        // Dynamic nav background on scroll
-        window.addEventListener('scroll', function() {
-            const nav = document.querySelector('nav');
-            if (window.scrollY > 10) {
-                nav.classList.add('scrolled');
-            } else {
-                nav.classList.remove('scrolled');
-            }
+  var gk_isXlsx = false;
+  var gk_xlsxFileLookup = {};
+  var gk_fileData = {};
+  function filledCell(cell) {
+    return cell !== "" && cell != null;
+  }
+  function loadFileData(filename) {
+    if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+      try {
+        var workbook = XLSX.read(gk_fileData[filename], { type: "base64" });
+        var firstSheetName = workbook.SheetNames[0];
+        var worksheet = workbook.Sheets[firstSheetName];
+        var jsonData = XLSX.utils.sheet_to_json(worksheet, {
+          header: 1,
+          blankrows: false,
+          defval: "",
         });
-
-        // Trigger animations on scroll
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.animationPlayState = 'running';
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.contact-item, .contact-section h2').forEach(el => {
-            observer.observe(el);
+        var filteredData = jsonData.filter((row) => row.some(filledCell));
+        var headerRowIndex = filteredData.findIndex(
+          (row, index) =>
+            row.filter(filledCell).length >=
+            filteredData[index + 1]?.filter(filledCell).length
+        );
+        if (headerRowIndex === -1 || headerRowIndex > 25) {
+          headerRowIndex = 0;
+        }
+        var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+        csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+        return csv;
+      } catch (e) {
+        console.error(e);
+        return "";
+      }
+    }
+    return gk_fileData[filename] || "";
+  }
+</script>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="favicon.png" type="image/png" sizes="32x32" />
+    <title>Contact - Mohamed Sabry</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #0b1a3b
+          url(Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg) no-repeat center
+          center fixed;
+        background-size: cover;
+        color: #f5f6f5;
+        line-height: 1.6;
+        overflow-x: hidden;
+        position: relative;
+        font-family: "Arial", sans-serif;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(11, 26, 59, 0.4)
+          url("https://www.transparenttextures.com/patterns/canvas.png");
+        z-index: -1;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+      nav {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        padding: 1rem 0;
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+      }
+      nav.scrolled {
+        background: rgba(29, 42, 91, 0.9);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+      .nav-links {
+        display: flex;
+        justify-content: center;
+        gap: 2.5rem;
+      }
+      .nav-links a {
+        color: #f5f6f5;
+        text-decoration: none;
+        font-size: 1rem;
+        position: relative;
+        transition: color 0.3s ease;
+        font-family: "Georgia", serif;
+      }
+      .nav-links a.active::after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 3px;
+        bottom: -5px;
+        left: 0;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 10"><path d="M0,5 Q25,0 50,5 T100,5" stroke="%23E8D07A" stroke-width="2" fill="none"/></svg>')
+          no-repeat center;
+        background-size: contain;
+      }
+      .nav-links a:hover {
+        color: #e8d07a;
+      }
+      .contact-section {
+        padding: 5rem 0;
+        text-align: center;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .contact-section h2 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 1s ease-out 0.3s forwards;
+        color: #f5f6f5;
+        font-family: "Georgia", serif;
+        position: relative;
+      }
+      .contact-section h2::after {
+        content: "";
+        display: block;
+        width: 100px;
+        height: 5px;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 10"><path d="M0,5 Q25,0 50,5 T100,5" stroke="%23E8D07A" stroke-width="2" fill="none"/></svg>')
+          no-repeat center;
+        margin: 1rem auto;
+      }
+      .contact-info {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2rem;
+      }
+      .contact-item {
+        background: #1d2a5b;
+        padding: 1.5rem;
+        border-radius: 10px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 1s ease-out 0.6s forwards;
+        min-width: 250px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+      }
+      .contact-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+      .contact-item i {
+        font-size: 1.5rem;
+        color: #e8d07a;
+      }
+      .contact-item a {
+        color: #e8d07a;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+      .contact-item a:hover {
+        color: #f5f6f5;
+      }
+      .code-snippet {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: #1d2a5b;
+        padding: 0.5rem;
+        border-radius: 5px;
+        font-family: "Courier New", monospace;
+        color: #e8d07a;
+        font-size: 0.8rem;
+        z-index: 10;
+      }
+      .contact-item:hover .code-snippet {
+        display: block;
+      }
+      footer {
+        text-align: center;
+        padding: 2rem 0;
+        background: #1d2a5b;
+        position: relative;
+      }
+      footer p {
+        color: #f5f6f5;
+      }
+      .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        pointer-events: none;
+      }
+      .particle {
+        position: absolute;
+        background: #e8d07a;
+        border-radius: 50%;
+        animation: twinkle 3s infinite alternate;
+      }
+      @keyframes twinkle {
+        0% {
+          opacity: 0.2;
+        }
+        100% {
+          opacity: 0.8;
+        }
+      }
+      @keyframes fadeInUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @media (max-width: 768px) {
+        .contact-section h2 {
+          font-size: 2rem;
+        }
+        .contact-item {
+          min-width: 200px;
+        }
+        .code-snippet {
+          font-size: 0.7rem;
+        }
+        .nav-links {
+          gap: 1.5rem;
+        }
+      }
+      @media (max-width: 480px) {
+        .contact-section h2 {
+          font-size: 1.8rem;
+        }
+        .contact-item {
+          padding: 1rem;
+        }
+        .code-snippet {
+          font-size: 0.6rem;
+        }
+        .nav-links {
+          flex-direction: column;
+          align-items: center;
+          gap: 1rem;
+        }
+        .nav-links a {
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="particles"></div>
+    <nav>
+      <div class="container">
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="projects.html">Projects</a>
+          <a href="contact.html" class="active">Contact</a>
+          <a href="certifications.html">Certifications</a>
+          <a href="https://github.com/mosabryii" target="_blank">GitHub</a>
+        </div>
+      </div>
+    </nav>
+    <section class="contact-section">
+      <div class="container">
+        <h2>Contact Information</h2>
+        <div class="contact-info">
+          <div class="contact-item">
+            <i class="fas fa-phone"></i>
+            <p>Phone: <a href="tel:+201159282168">+201159282168</a></p>
+            <div class="code-snippet">phone = "+201159282168"</div>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <p>
+              Email:
+              <a href="mailto:mohameds.ms192@gmail.com"
+                >mohameds.ms192@gmail.com</a
+              >
+            </p>
+            <div class="code-snippet">email = "mohameds.ms192@gmail.com"</div>
+          </div>
+          <div class="contact-item">
+            <i class="fab fa-linkedin"></i>
+            <p>
+              LinkedIn:
+              <a
+                href="https://www.linkedin.com/in/mohamed-sabry-5a857822a/"
+                target="_blank"
+                >Profile</a
+              >
+            </p>
+            <div class="code-snippet">
+              url = "linkedin.com/in/mohamed-sabry"
+            </div>
+          </div>
+          <div class="contact-item">
+            <i class="fab fa-github"></i>
+            <p>
+              GitHub:
+              <a href="https://github.com/mosabryii" target="_blank"
+                >mosabryii</a
+              >
+            </p>
+            <div class="code-snippet">repo = "github.com/mosabryii"</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer>
+      <div class="container">
+        <p>© 2025 Mohamed Sabry. All rights reserved.</p>
+      </div>
+    </footer>
+    <script>
+      function createParticles() {
+        const particlesContainer = document.querySelector(".particles");
+        const numParticles = 50;
+        for (let i = 0; i < numParticles; i++) {
+          const particle = document.createElement("div");
+          particle.className = "particle";
+          particle.style.width = `${Math.random() * 2 + 1}px`;
+          particle.style.height = particle.style.width;
+          particle.style.left = `${Math.random() * 100}%`;
+          particle.style.top = `${Math.random() * 100}%`;
+          particle.style.animationDelay = `${Math.random() * 3}s`;
+          particlesContainer.appendChild(particle);
+        }
+      }
+      createParticles();
+      window.addEventListener("scroll", function () {
+        const nav = document.querySelector("nav");
+        if (window.scrollY > 10) {
+          nav.classList.add("scrolled");
+        } else {
+          nav.classList.remove("scrolled");
+        }
+      });
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.style.animationPlayState = "running";
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+      document
+        .querySelectorAll(".contact-item, .contact-section h2")
+        .forEach((el) => {
+          observer.observe(el);
         });
     </script>
-</body>
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'93995cc6be79bfcc',t:'MTc0NjIwODI0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
+        }
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
+  </body>
 </html>
